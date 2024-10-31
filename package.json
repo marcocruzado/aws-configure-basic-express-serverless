@@ -1,8 +1,13 @@
 {
-  "name": "rimac",
+  "name": "Indra Prueba Tecnica",
   "version": "1.0.0",
-  "description": "Prueba Técnica para el de API de Rimac",
+  "description": "Prueba Técnica para Indra",
+  "scripts": {
+    "test": "jest"
+  },
   "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.682.0",
+    "@aws-sdk/lib-dynamodb": "^3.682.0",
     "aws-serverless-express": "^3.4.0",
     "axios": "^0.27.2",
     "body-parser": "^1.20.0",
@@ -11,9 +16,11 @@
     "express": "^4.17.1",
     "express-jsdoc-swagger": "^1.7.0",
     "mongoose": "^6.4.6",
-    "serverless-http": "^2.7.0"
+    "serverless-http": "^2.7.0",
+    "uuid": "^11.0.2"
   },
   "devDependencies": {
+    "jest": "^29.7.0",
     "serverless-dynamodb-local": "^0.2.40",
     "serverless-offline": "^9.0.0",
     "serverless-prune-plugin": "^2.0.1"

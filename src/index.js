@@ -4,7 +4,9 @@ const express = require("express");
 const bodyParser = require('body-parser')
 const cors = require("cors");
 
-const {router:SwarsRouter} = require('./routes/index.routes');
+//import the routes
+const {router:SwarsRouter} = require('./routes/swars.routes');
+const {router:PersonajesRouter} = require('./routes/personajes.routes');
 
 //initialize the app
 const app = express();
@@ -15,6 +17,7 @@ app.use(bodyParser.json());
 
 //Routes
 app.use('/',SwarsRouter);
+app.use('/personajes',PersonajesRouter);
 
 //export the app
 module.exports = app;

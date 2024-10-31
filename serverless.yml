@@ -1,19 +1,18 @@
-service: rimac
-frameworkVersion: '3'
+service: IndraStarWarsAPI
+
 
 provider:
   name: aws
-  runtime: nodejs14.x
+  runtime: nodejs16.x
   region: us-east-1
   stage: api
-
-plugins:
-  - serverless-prune-plugin
-  - serverless-dynamodb-local
-  - serverless-offline
+  environment:
+    DYNAMODB_TABLE: StarWarsModelsTable
+    START_WARS_API: https://swapi.py4e.com/api
+    port: 3000
 
 functions:
-  api:
+  app:
     handler: handler.handler
     events:
       - http:
@@ -24,3 +23,22 @@ functions:
           path: /{proxy+}
           method: any
           cors: true
+
+resources:
+  Resources:
+    StarWarsModelsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.DYNAMODB_TABLE}
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+
+plugins:
+  - serverless-prune-plugin
+  - serverless-dynamodb-local
+  - serverless-offline

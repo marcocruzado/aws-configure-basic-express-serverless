@@ -5,15 +5,19 @@ const SERVER = {
     PORT: process.env.PORT || 3000,
 }
 
-//other configs
+//DynamoDB
 const DATABASE = {
-    HOST: process.env.HOST || 'cluster0.bepdjv2.mongodb.net',
-    USER: process.env.USER || 'prueba',
-    PASSWORD: process.env.PASSWORD || 'rimac',
-    DATABASE: process.env.DATABASE || 'swapi-rimac',
+    DYNAMODB_TABLE : process.env.DYNAMODB_TABLE || 'StarWarsModelsTable',
+}
+
+
+//starwars api
+const SWAPI = {
+    URL: process.env.START_WARS_API || 'https://swapi.py4e.com/api',
 }
 
 module.exports = {
     SERVER,
-    DATABASE
+    DATABASE,
+    SWAPI
 }

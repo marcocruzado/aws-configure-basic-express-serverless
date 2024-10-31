@@ -1,106 +1,175 @@
-<!--
-title: 'Serverless Framework Node Express API on AWS'
-description: 'This template demonstrates how to develop and deploy a simple Node Express API running on AWS Lambda using the traditional Serverless Framework.'
-layout: Doc
-framework: v3
-platform: AWS
-language: nodeJS
-priority: 1
-authorLink: 'https://github.com/serverless'
-authorName: 'Serverless, inc.'
-authorAvatar: 'https://avatars1.githubusercontent.com/u/13742415?s=200&v=4'
--->
+# prueba-tecnica-nodejs
+RETO TÉCNICO BACKEND NODEJS
 
-# Serverless Framework Node Express API on AWS
+# Descripción del reto técnico:
 
-This template demonstrates how to develop and deploy a simple Node Express API service running on AWS Lambda using the traditional Serverless Framework.
+- Crear una API en Node.js con el framework Serverless para un despliegue en AWS.
 
-## Anatomy of the template
+- Adaptar y transformar los modelos de la API de prueba. Se tienen que mapear todos los nombres de atributos modelos del inglés al español (Ej: name -> nombre).
 
-This template configures a single function, `api`, which is responsible for handling all incoming requests thanks to the `httpApi` event. To learn more about `httpApi` event configuration options, please refer to [httpApi event docs](https://www.serverless.com/framework/docs/providers/aws/events/http-api/). As the event is configured in a way to accept all incoming requests, `express` framework is responsible for routing and handling requests internally. Implementation takes advantage of `serverless-http` package, which allows you to wrap existing `express` applications. To learn more about `serverless-http`, please refer to corresponding [GitHub repository](https://github.com/dougmoscrop/serverless-http).
+- Integrar la API de prueba StarWars API (líneas abajo está el link) se deben integrar uno o más endpoints.
 
-## Usage
+- Crear un modelo de su elección mediante el uso de un endpoint POST, la data se tendrá que almacenar dentro de una base de datos.
 
-### Deployment
+- Crear un endpoint GET que muestre la data almacenada.
 
-Install dependencies with:
+![Arquitectura](img/Arquitectura.png)
 
-```
-npm install
-```
+# Requerimientos
 
-and then deploy with:
+- Node Js 
+- AWS CLI
+- serverless framework
+- GitHub
 
-```
-serverless deploy
-```
 
-After running deploy, you should see output similar to:
+### Paso 1
+Configuración de NodeJs
 
-```bash
-Deploying aws-node-express-api-project to stage dev (us-east-1)
+Actualmente manejo **MVN** para las multiples vversiones de NodeJs que tengo en mi computador, para este caso usaremos la vervion de **Node 16**
 
-✔ Service deployed to stack aws-node-express-api-project-dev (196s)
+### Paso 2
+Configuracion de AWS
 
-endpoint: ANY - https://xxxxxxxxxx.execute-api.us-east-1.amazonaws.com
-functions:
-  api: aws-node-express-api-project-dev-api (766 kB)
-```
-
-_Note_: In current form, after deployment, your API is public and can be invoked by anyone. For production deployments, you might want to configure an authorizer. For details on how to do that, refer to [`httpApi` event docs](https://www.serverless.com/framework/docs/providers/aws/events/http-api/).
-
-### Invocation
-
-After successful deployment, you can call the created application via HTTP:
-
-```bash
-curl https://xxxxxxx.execute-api.us-east-1.amazonaws.com/
-```
-
-Which should result in the following response:
+Con nuestra cuenta de AWS crearemos un usario llamado **__serverless-deployer__**,le vamos a asociar las politicas minimas nesesarias para que pueda realizar el despliegue y la interaccion con los servicios, necesarios para esta prueba.
 
 ```
-{"message":"Hello from root!"}
+{
+	"Version": "2012-10-17",
+	"Statement": [
+		{
+			"Effect": "Allow",
+			"Action": [
+				"lambda:*",
+				"logs:*",
+				"apigateway:*",
+				"dynamodb:*",
+				"cloudformation:*",
+				"s3:*",
+				"iam:PassRole",
+				"rds:*"
+			],
+			"Resource": "*"
+		}
+	]
+}
 ```
 
-Calling the `/hello` path with:
-
-```bash
-curl https://xxxxxxx.execute-api.us-east-1.amazonaws.com/hello
-```
-
-Should result in the following response:
-
-```bash
-{"message":"Hello from path!"}
-```
-
-If you try to invoke a path or method that does not have a configured handler, e.g. with:
-
-```bash
-curl https://xxxxxxx.execute-api.us-east-1.amazonaws.com/nonexistent
-```
-
-You should receive the following response:
-
-```bash
-{"error":"Not Found"}
-```
-
-### Local development
-
-It is also possible to emulate API Gateway and Lambda locally by using `serverless-offline` plugin. In order to do that, execute the following command:
-
-```bash
-serverless plugin install -n serverless-offline
-```
-
-It will add the `serverless-offline` plugin to `devDependencies` in `package.json` file as well as will add it to `plugins` in `serverless.yml`.
-
-After installation, you can start local emulation with:
+estos son los roles para el usuario (la variables son diferentes)
 
 ```
-serverless offline
+{
+	"Version": "2012-10-17",
+	"Statement": [
+		{
+			"Action": [
+				"logs:CreateLogStream",
+				"logs:CreateLogGroup",
+				"logs:TagResource"
+			],
+			"Resource": [
+				"arn:aws:logs:us-east-1:723523523523:log-group:/aws/lambda/IndraStarWarsAPI-api*:*"
+			],
+			"Effect": "Allow"
+		},
+		{
+			"Action": [
+				"logs:PutLogEvents"
+			],
+			"Resource": [
+				"arn:aws:logs:us-east-1:723523523523:log-group:/aws/lambda/IndraStarWarsAPI-api*:*:*"
+			],
+			"Effect": "Allow"
+		},
+		{
+			"Effect": "Allow",
+			"Action": [
+				"dynamodb:PutItem"
+			],
+			"Resource": "arn:aws:dynamodb:us-east-1:723523523523:table/StarWarsModelsTable"
+		}
+	]
+}
 ```
 
-To learn more about the capabilities of `serverless-offline`, please refer to its [GitHub repository](https://github.com/dherault/serverless-offline).
+
+Politica de permisos Asociadoal usuario.
+y generamos las claves de acceso del usuario programatico.
+
+![alt text](img/claves.png)
+
+Instalamos AWS CLI  en nuesta maquina estamo susando Windows
+![alt text](img/AWS-CLI.png)
+
+ahora vamos a configurar nuestra credenciales en nuestro Entorno Local, con el comando 
+
+```
+aws configure
+```
+
+### Paso 3
+Configuracion de Serverless 
+
+vamos a instalar serverless en para poder realizar el despliegue con el comando 
+
+```
+npm install -g serverless
+```
+
+y una ves tengamos toda las configuraciones y el codigo listo ejecutar el comando 
+
+```
+serverless deploy --verbose
+```
+
+
+### RESULTADO 
+
+Curl de los EndPoints
+
+POST:  api/add
+
+- En base al codigo id del personaje toma los valores del mismo y los guarda en DynamoBD
+
+```
+curl --location 'https://pws72q6kk5.execute-api.us-east-1.amazonaws.com/api/add' \
+--header 'Content-Type: application/json' \
+--data '{
+	"id": 20
+}'
+```
+
+
+GET : api/list
+
+- Llama a todos los personajes con las variables en Español
+
+```
+curl --location 'https://pws72q6kk5.execute-api.us-east-1.amazonaws.com/api/list
+```
+
+GET: api/
+
+- La bienvenida
+
+```
+curl --location 'https://pws72q6kk5.execute-api.us-east-1.amazonaws.com/api
+```
+
+GET: api/personajes
+
+- Todos los personajes guardados en la BD de DynamoDB
+
+```
+curl --location 'https://pws72q6kk5.execute-api.us-east-1.amazonaws.com/api/personajes
+```
+
+
+
+GET: api/personaje
+
+- Personaje guardado con id  en la BD de DynamoDB
+
+```
+curl --location 'https://pws72q6kk5.execute-api.us-east-1.amazonaws.com/api/personajes/:id
+```
